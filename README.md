@@ -18,3 +18,8 @@ These portfolio demos are independently written simulations with synthetic data 
 - [Commercial Workspace source ZIP](commercial-workspace-source.zip) — runnable Flask and SQLite application with synthetic records and 20 acceptance tests.
 - [Investment Operations interface](investment-operations-interface.html) — anonymized edition of the original standalone MVP interface. Download the HTML and open it in a browser to navigate the investor and operator screens.
 - [Billing & Receivables Studio](https://github.com/haideraligh05-ctrl/billing-receivables-studio) — offline invoicing and payment tracking application.
+
+## Backend and configurable tools
+
+- [Investment Operations Backend ZIP](investment-operations-backend.zip) — anonymized Express and PostgreSQL source with setup instructions and locally generated demo accounts.
+- [Configurable Operations Workbench](configurable-operations.html) — download and open the HTML file for editable payout, salary validation, and eligibility workflows. Use fictional records and export evaluation results as JSON.

@@ -1,0 +1,77 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configurable Operations Workbench</title>
+<style>
+body{background:#eef3f6;color:#172f40;font:16px system-ui;margin:0}main{max-width:780px;margin:5vh auto;padding:20px}section{background:white;padding:24px;margin:16px 0;border-radius:12px}textarea{width:100%;box-sizing:border-box;font:15px monospace;padding:12px}label{display:block;font-weight:600;margin:12px 0 6px}button,select{padding:9px;font:inherit}pre{white-space:pre-wrap;background:#17354b;color:white;padding:14px;border-radius:8px}
+</style>
+<main><h1>Configurable Operations Workbench</h1><p>Choose a workflow, edit its rules and sample record, then calculate a decision with a reason.</p>
+<section><label for="workflow">Workflow</label><select id="workflow"><option>Payout reconciliation</option><option>Salary validation</option><option>Eligibility calculator</option></select>
+<label for="rules">Rules (JSON)</label><textarea id="rules" rows="9"></textarea><label for="record">Input record (JSON)</label><textarea id="record" rows="8"></textarea><button id="run">Evaluate</button> <button id="export">Download result</button><pre id="output" aria-live="polite"></pre></section>
+</main><script>
+"use strict";
+const scenarios = [
+  [{toleranceMinor:0, requireEvidence:true}, {grossMinor:100000,deductionsMinor:15000,recoveriesMinor:5000,reportedMinor:80000,evidence:true}],
+  [{roles:{Analyst:{minimumScore:75,minimumAttendance:90,requireEvidence:true}}}, {role:"Analyst",score:82,attendance:95,evidence:true}],
+  [{roles:{Analyst:{minimumScore:75,benefit:"Training allowance"}}}, {role:"Analyst",score:82}]
+];
+function integer(value, name) {
+  if (!Number.isSafeInteger(value) || value < 0 || value > 1e12) throw Error(name + " must be a whole number from 0 to 1 trillion.");
+  return value;
+}
+function percent(value,name) {
+  if(typeof value!=="number" || !Number.isFinite(value) || value<0 || value>100) throw Error(name+" must be between 0 and 100.");
+  return value;
+}
+function flag(value,name) {
+  if(typeof value!=="boolean") throw Error(name+" must be true or false.");
+  return value;
+}
+function evaluate(mode, rules, record) {
+  const reasons=[];
+  if (mode===0) {
+    const gross=integer(record.grossMinor,"Gross");
+    const net=gross-integer(record.deductionsMinor,"Deductions")-integer(record.recoveriesMinor,"Recoveries");
+    const variance=integer(record.reportedMinor,"Reported net")-net;
+    if(net<0) reasons.push("Net is negative");
+    if(Math.abs(variance)>integer(rules.toleranceMinor,"Tolerance")) reasons.push("Variance exceeds tolerance");
+    if(flag(rules.requireEvidence,"Evidence rule") && !flag(record.evidence,"Evidence")) reasons.push("Evidence is missing");
+    return {status:reasons.length?"Needs review":"Ready for approval",netMinor:net,varianceMinor:variance,reasons};
+  }
+  if(typeof record.role!=="string" || !rules.roles || !Object.hasOwn(rules.roles,record.role)) throw Error("Select a role defined in the rules.");
+  const role=rules.roles[record.role];
+  if(percent(record.score,"Score")<percent(role.minimumScore,"Minimum score")) reasons.push("Score below threshold");
+  if(mode===1){
+    if(percent(record.attendance,"Attendance")<percent(role.minimumAttendance,"Minimum attendance")) reasons.push("Attendance below threshold");
+    if(flag(role.requireEvidence,"Evidence rule") && !flag(record.evidence,"Evidence")) reasons.push("Evidence is missing");
+    return {status:reasons.length?"Needs review":"Ready for reviewer approval",reasons};
+  }
+  if(typeof role.benefit!=="string" || !role.benefit.trim()) throw Error("Enter a benefit name in the role rules.");
+  return {status:reasons.length?"Below threshold":"Eligible for review",benefit:reasons.length?null:role.benefit,reasons};
+}
+const field=id=>document.getElementById(id);
+let lastResult=null;
+function run(){
+  try{
+    const mode=field("workflow").selectedIndex;
+    const rules=JSON.parse(field("rules").value),record=JSON.parse(field("record").value);
+    lastResult={workflow:field("workflow").value,rules,record,result:evaluate(mode,rules,record)};
+    field("output").textContent=JSON.stringify(lastResult.result,null,2);
+  } catch(error) {
+    lastResult=null;
+    field("output").textContent=error.message;
+  }
+  field("export").disabled=!lastResult;
+}
+function reset(){
+  const [rules,record]=scenarios[field("workflow").selectedIndex];
+  field("rules").value=JSON.stringify(rules,null,2);field("record").value=JSON.stringify(record,null,2);run();
+}
+field("workflow").addEventListener("change",reset);
+field("run").addEventListener("click",run);
+for(const id of ["rules","record"]) field(id).addEventListener("input",()=>{lastResult=null;field("export").disabled=true;field("output").textContent="Run the edited scenario to refresh the result.";});
+field("export").addEventListener("click",()=>{
+  if(!lastResult)return;
+  const url=URL.createObjectURL(new Blob([JSON.stringify(lastResult,null,2)],{type:"application/json"}));
+  const a=document.createElement("a");a.href=url;a.download="operations-review.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+reset();
+</script></html>
