@@ -1,0 +1,20 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eligibility and Benefits Calculator</title><style>
+body{margin:0;background:#eef2f6;color:#142d40;font:16px system-ui}main{max-width:680px;margin:6vh auto;padding:24px}form{background:white;border-radius:12px;padding:24px;display:grid;gap:14px}label{display:grid;gap:6px}input,select,button{font:inherit;padding:10px}output{display:block;margin-top:20px;background:#173950;color:white;padding:18px;border-radius:9px;white-space:pre-line}button{background:#165e6b;color:white;border:0;border-radius:7px}
+</style><main><h1>Eligibility and Benefits Calculator</h1><p>Try fictional role-specific thresholds. These rules are for illustration.</p><form><label>Role<select name="role"><option>Consultant</option><option>Manager</option></select></label><label>Performance points<input name="score" type="number" min="0" max="100" value="85" required></label><button>Run scenario</button></form><output aria-live="polite"></output></main>
+<script>
+const form = document.querySelector('form');
+const output = document.querySelector('output');
+function show(event) {
+  event?.preventDefault();
+  const values = Object.fromEntries(new FormData(form));
+  const n = key => Number(values[key]);
+  const money = value => value.toFixed(2) + ' units';
+  const threshold = values.role === 'Manager' ? 90 : 80;
+  const eligible = n('score') >= threshold;
+  output.textContent = ['Sample threshold: ' + threshold + ' points',
+    eligible ? 'Eligible for benefits review' : 'Below the sample eligibility threshold'].join('\n');
+}
+form.addEventListener('submit', show);
+show();
+</script></html>

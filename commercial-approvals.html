@@ -1,0 +1,24 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Commercial Approval and Order Tracking</title><style>
+body{margin:0;background:#eef2f6;color:#142d40;font:16px system-ui}main{max-width:680px;margin:6vh auto;padding:24px}form{background:white;border-radius:12px;padding:24px;display:grid;gap:14px}label{display:grid;gap:6px}input,select,button{font:inherit;padding:10px}output{display:block;margin-top:20px;background:#173950;color:white;padding:18px;border-radius:9px;white-space:pre-line}button{background:#165e6b;color:white;border:0;border-radius:7px}
+</style><main><h1>Commercial Approval and Order Tracking</h1><p>Choose a synthetic order stage and review the next owner and action.</p><form><label>Order stage<select name="stage"><option>Submitted</option><option>Technical review</option><option>Approved</option><option>In delivery</option><option>Delivered</option></select></label><button>Run scenario</button></form><output aria-live="polite"></output></main>
+<script>
+const form = document.querySelector('form');
+const output = document.querySelector('output');
+function show(event) {
+  event?.preventDefault();
+  const values = Object.fromEntries(new FormData(form));
+  const n = key => Number(values[key]);
+  const money = value => value.toFixed(2) + ' units';
+  const next = {
+    'Submitted': 'Sales operations: check completeness and assign a reviewer.',
+    'Technical review': 'Technical reviewer: record the approval decision.',
+    'Approved': 'Order operations: confirm the order and schedule delivery.',
+    'In delivery': 'Delivery team: log delivery evidence.',
+    'Delivered': 'Order operations: reconcile the record and close the order.'
+  };
+  output.textContent = values.stage + '\n' + next[values.stage];
+}
+form.addEventListener('submit', show);
+show();
+</script></html>

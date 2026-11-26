@@ -1,0 +1,18 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Validation Review Queue</title><style>
+body{margin:0;background:#eef2f6;color:#142d40;font:16px system-ui}main{max-width:680px;margin:6vh auto;padding:24px}form{background:white;border-radius:12px;padding:24px;display:grid;gap:14px}label{display:grid;gap:6px}input,select,button{font:inherit;padding:10px}output{display:block;margin-top:20px;background:#173950;color:white;padding:18px;border-radius:9px;white-space:pre-line}button{background:#165e6b;color:white;border:0;border-radius:7px}
+</style><main><h1>Validation Review Queue</h1><p>Review a fictional assessment against rule results and supporting evidence.</p><form><label>Rule result<select name="rule"><option>Passed</option><option>Failed</option></select></label><label>Evidence<select name="evidence"><option>Complete</option><option>Missing</option></select></label><button>Run scenario</button></form><output aria-live="polite"></output></main>
+<script>
+const form = document.querySelector('form');
+const output = document.querySelector('output');
+function show(event) {
+  event?.preventDefault();
+  const values = Object.fromEntries(new FormData(form));
+  const n = key => Number(values[key]);
+  const money = value => value.toFixed(2) + ' units';
+  const ready=values.rule==='Passed' && values.evidence==='Complete';
+  output.textContent=ready ? 'Ready for reviewer approval' : 'Exception queue: '+[values.rule==='Failed'?'Rule failed':'', values.evidence==='Missing'?'Evidence missing':''].filter(Boolean).join(', ');
+}
+form.addEventListener('submit', show);
+show();
+</script></html>
