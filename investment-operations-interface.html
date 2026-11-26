@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Investment Operations Workbench</title>
+  <style>
+    :root {
+      --navy: #0A2342;
+      --gold: #D4AF37;
+      --accent: #1E3A8A;
+      --mist: #F8FAFC;
+      --ink: #102033;
+      --line: #E2E8F0;
+      --muted: #64748B;
+      --white: #FFFFFF;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--mist);
+      color: var(--ink);
+    }
+
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+    }
+
+    .sidebar {
+      background: var(--navy);
+      color: var(--white);
+      padding: 24px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .brand {
+      margin-bottom: 28px;
+    }
+
+    .brand strong {
+      display: block;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    .brand span {
+      color: #CBD5E1;
+      font-size: 13px;
+    }
+
+    .nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav button {
+      border: 0;
+      color: #E2E8F0;
+      background: transparent;
+      text-align: left;
+      padding: 11px 12px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+
+    .nav button.active,
+    .nav button:hover {
+      background: rgba(255,255,255,.12);
+      color: var(--white);
+    }
+
+    .main {
+      min-width: 0;
+    }
+
+    .topbar {
+      background: var(--white);
+      border-bottom: 1px solid var(--line);
+      padding: 20px 32px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .eyebrow {
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 800;
+      margin: 0 0 4px;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      margin-bottom: 0;
+      color: var(--navy);
+      font-size: 28px;
+      letter-spacing: 0;
+    }
+
+    .content {
+      padding: 28px 32px;
+      display: grid;
+      gap: 22px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .metrics {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .two {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 8px 22px rgba(10, 35, 66, .05);
+    }
+
+    .metric small {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 10px;
+      color: var(--navy);
+      font-size: 26px;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 5px;
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      background: rgba(212, 175, 55, .16);
+      color: var(--navy);
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th {
+      color: var(--muted);
+      text-align: left;
+      padding: 12px 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    td {
+      border-top: 1px solid #EEF2F7;
+      padding: 14px 8px;
+      vertical-align: middle;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      color: #334155;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    input, select {
+      min-height: 42px;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      padding: 9px 11px;
+      color: var(--navy);
+      background: var(--white);
+    }
+
+    .form {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .btn {
+      min-height: 40px;
+      border: 0;
+      border-radius: 6px;
+      padding: 9px 14px;
+      background: var(--navy);
+      color: var(--white);
+      font-weight: 800;
+    }
+
+    .btn.gold {
+      background: var(--gold);
+      color: var(--navy);
+    }
+
+    .btn.gray {
+      background: #475569;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: grid;
+      gap: 22px;
+    }
+
+    .hero {
+      min-height: 100vh;
+      background:
+        linear-gradient(90deg, rgba(10,35,66,.94), rgba(10,35,66,.75));
+      background-size: cover;
+      background-position: center;
+      color: var(--white);
+      display: grid;
+      align-content: center;
+      padding: 56px;
+    }
+
+    .hero h1 {
+      color: var(--white);
+      max-width: 850px;
+      font-size: clamp(42px, 7vw, 72px);
+      line-height: 1;
+    }
+
+    .hero p {
+      color: #E2E8F0;
+      max-width: 680px;
+      font-size: 18px;
+      line-height: 1.7;
+      margin-top: 22px;
+    }
+
+    .login-box {
+      margin-top: 28px;
+      max-width: 470px;
+      background: var(--white);
+      color: var(--navy);
+      border-radius: 8px;
+      padding: 20px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .hidden { display: none; }
+
+    @media (max-width: 900px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static;
+        height: auto;
+      }
+      .nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .metrics, .two, .three, .form {
+        grid-template-columns: 1fr;
+      }
+      .topbar, .content { padding: 20px; }
+      .hero { padding: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <section id="landing" class="hero">
+    <p class="eyebrow">INVESTMENT OPERATIONS</p>
+    <h1>Premium digital investing for Kenya's next generation of wealth builders.</h1>
+    <p>Register, complete KYC, fund a wallet through admin approval, browse curated investments, submit investment requests, and track portfolio growth.</p>
+    <div class="login-box">
+      <label>Email <input value="investor@example.test" /></label>
+      <label>Password <input type="password" /></label>
+      <button class="btn gold" onclick="enterApp('dashboard')">Enter Investor Demo</button>
+      <button class="btn" onclick="enterApp('admin')">Enter Admin Demo</button>
+    </div>
+  </section>
+
+  <section id="app" class="app hidden">
+    <aside class="sidebar">
+      <div class="brand">
+        <strong>Investment Operations</strong>
+        <span>Secure MVP demo</span>
+      </div>
+      <nav class="nav">
+        <button data-target="dashboard" class="active">Dashboard</button>
+        <button data-target="kyc">KYC</button>
+        <button data-target="wallet">Wallet</button>
+        <button data-target="marketplace">Marketplace</button>
+        <button data-target="portfolio">Portfolio</button>
+        <button data-target="admin">Admin</button>
+        <button data-target="reports">Reports</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Kenya digital investment platform</p>
+          <h1 id="page-title">Investor Dashboard</h1>
+        </div>
+        <button class="btn gray" onclick="location.reload()">Logout</button>
+      </header>
+
+      <div class="content">
+        <section id="dashboard" class="screen active">
+          <div class="grid metrics">
+            <article class="card metric"><small>Wallet balance</small><strong>KES 250,000</strong><span>Admin approved funds</span></article>
+            <article class="card metric"><small>Total invested</small><strong>KES 640,000</strong><span>4 active holdings</span></article>
+            <article class="card metric"><small>Expected returns</small><strong>KES 82,400</strong><span>Manual admin updates</span></article>
+            <article class="card metric"><small>Pending requests</small><strong>2</strong><span>Awaiting approval</span></article>
+          </div>
+          <div class="grid two">
+            <article class="card">
+              <h2>Recent Transactions</h2>
+              <table>
+                <thead><tr><th>Activity</th><th>Amount</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td>Funding approved</td><td>KES 250,000</td><td><span class="badge">Credit</span></td></tr>
+                  <tr><td>Infrastructure bond request</td><td>KES 100,000</td><td><span class="badge">Pending</span></td></tr>
+                  <tr><td>Fixed income allocation</td><td>KES 200,000</td><td><span class="badge">Debit</span></td></tr>
+                </tbody>
+              </table>
+            </article>
+            <article class="card">
+              <h2>KYC Status</h2>
+              <p><span class="badge">Approved</span></p>
+              <p style="color:var(--muted);line-height:1.7">Investor can submit wallet funding and investment requests. Admin actions are captured in audit logs.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="kyc" class="screen">
+          <article class="card">
+            <h2>KYC Submission</h2>
+            <div class="form">
+              <label>National ID or Passport <input placeholder="12345678" /></label>
+              <label>KRA PIN <input placeholder="A123456789B" /></label>
+              <label>Residential address <input placeholder="Westlands, Nairobi" /></label>
+              <label>Bank name <input placeholder="KCB Bank" /></label>
+              <label>Bank account name <input placeholder="Sample Investor" /></label>
+              <label>Bank account number <input placeholder="0123456789" /></label>
+            </div>
+            <p style="margin-top:16px"><span class="badge">Upload selfie, proof of income, ID document</span></p>
+            <button class="btn">Submit KYC</button>
+          </article>
+        </section>
+
+        <section id="wallet" class="screen">
+          <div class="grid two">
+            <article class="card metric"><small>Available wallet balance</small><strong>KES 250,000</strong><span>No withdrawal in MVP</span></article>
+            <article class="card">
+              <h2>Funding Request</h2>
+              <div class="form">
+                <label>Amount <input type="number" value="50000" /></label>
+                <label>Proof of payment <input type="file" /></label>
+              </div>
+              <p><button class="btn">Request Admin Approval</button></p>
+            </article>
+          </div>
+        </section>
+
+        <section id="marketplace" class="screen">
+          <div class="grid three">
+            <article class="card"><span class="badge">Bonds</span><h2>Sample Infrastructure Bond</h2><p>Minimum: KES 50,000</p><p>Expected return: 13.5% p.a.</p><button class="btn">Invest</button></article>
+            <article class="card"><span class="badge">Funds</span><h2>Sample Fixed Income Fund</h2><p>Minimum: KES 25,000</p><p>Expected return: 10% - 12% p.a.</p><button class="btn">Invest</button></article>
+            <article class="card"><span class="badge">NSE Stocks</span><h2>Sample Equity Allocation</h2><p>Minimum: KES 10,000</p><p>Expected return: Market-linked</p><button class="btn">Invest</button></article>
+          </div>
+        </section>
+
+        <section id="portfolio" class="screen">
+          <article class="card">
+            <h2>Portfolio Holdings</h2>
+            <table>
+              <thead><tr><th>Investment</th><th>Principal</th><th>Expected Return</th><th>Status</th><th>Maturity</th></tr></thead>
+              <tbody>
+                <tr><td>Sample Infrastructure Bond</td><td>KES 300,000</td><td>KES 40,500</td><td><span class="badge">Active</span></td><td>2029-06-30</td></tr>
+                <tr><td>Sample Fixed Income Fund</td><td>KES 200,000</td><td>KES 22,000</td><td><span class="badge">Active</span></td><td>2027-06-30</td></tr>
+                <tr><td>US Blue Chip NYSE Basket</td><td>KES 140,000</td><td>KES 19,900</td><td><span class="badge">Active</span></td><td>2030-12-31</td></tr>
+              </tbody>
+            </table>
+          </article>
+        </section>
+
+        <section id="admin" class="screen">
+          <div class="grid metrics">
+            <article class="card metric"><small>KYC reviews</small><strong>14</strong><span>Pending</span></article>
+            <article class="card metric"><small>Funding approvals</small><strong>9</strong><span>Pending</span></article>
+            <article class="card metric"><small>Investment approvals</small><strong>6</strong><span>Pending</span></article>
+            <article class="card metric"><small>Audit events</small><strong>42</strong><span>Today</span></article>
+          </div>
+          <article class="card">
+            <h2>Admin Approval Queue</h2>
+            <table>
+              <thead><tr><th>Request</th><th>User</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr><td>KYC approval</td><td>Sample Investor</td><td><span class="badge">Submitted</span></td><td class="actions"><button class="btn gold">Approve</button><button class="btn gray">Reject</button></td></tr>
+                <tr><td>Funding request</td><td>Brian Mwangi</td><td><span class="badge">Pending</span></td><td class="actions"><button class="btn gold">Approve</button><button class="btn gray">Reject</button></td></tr>
+                <tr><td>Investment request</td><td>Grace Wanjiku</td><td><span class="badge">Pending</span></td><td class="actions"><button class="btn gold">Approve</button><button class="btn gray">Reject</button></td></tr>
+              </tbody>
+            </table>
+          </article>
+        </section>
+
+        <section id="reports" class="screen">
+          <article class="card">
+            <h2>Reports</h2>
+            <table>
+              <thead><tr><th>Report</th><th>Formats</th></tr></thead>
+              <tbody>
+                <tr><td>Users</td><td class="actions"><button class="btn">CSV</button><button class="btn">Excel</button><button class="btn">PDF</button></td></tr>
+                <tr><td>KYC status</td><td class="actions"><button class="btn">CSV</button><button class="btn">Excel</button><button class="btn">PDF</button></td></tr>
+                <tr><td>Wallet transactions</td><td class="actions"><button class="btn">CSV</button><button class="btn">Excel</button><button class="btn">PDF</button></td></tr>
+                <tr><td>Investments and portfolio summaries</td><td class="actions"><button class="btn">CSV</button><button class="btn">Excel</button><button class="btn">PDF</button></td></tr>
+              </tbody>
+            </table>
+          </article>
+        </section>
+      </div>
+    </main>
+  </section>
+
+  <script>
+    const titles = {
+      dashboard: "Investor Dashboard",
+      kyc: "KYC Center",
+      wallet: "Wallet Funding",
+      marketplace: "Investment Marketplace",
+      portfolio: "Portfolio",
+      admin: "Admin Command Center",
+      reports: "Reports"
+    };
+
+    function enterApp(target) {
+      document.getElementById("landing").classList.add("hidden");
+      document.getElementById("app").classList.remove("hidden");
+      showScreen(target);
+    }
+
+    function showScreen(target) {
+      document.querySelectorAll(".screen").forEach((screen) => screen.classList.remove("active"));
+      document.querySelectorAll(".nav button").forEach((button) => button.classList.toggle("active", button.dataset.target === target));
+      document.getElementById(target).classList.add("active");
+      document.getElementById("page-title").textContent = titles[target];
+    }
+
+    document.querySelectorAll(".nav button").forEach((button) => {
+      button.addEventListener("click", () => showScreen(button.dataset.target));
+    });
+  </script>
+</body>
+</html>
